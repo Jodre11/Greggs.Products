@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Greggs.Products.UnitTests;
 
-public class ProductController_GetLocale
+public class LocalProductController_Get
 {
     [Fact]
     public void BadPageStart()
@@ -19,9 +19,9 @@ public class ProductController_GetLocale
         string locale = "Euro";
         int pageStart = -1;
         int pageSize = 50;
-        var mockLogger = new Mock<ILogger<ProductController>>();
+        var mockLogger = new Mock<ILogger<LocalProductController>>();
         var mockDataAccess = new Mock<IDataAccess<Product>>();
-        var target = new ProductController(mockLogger.Object, mockDataAccess.Object);
+        var target = new LocalProductController(mockLogger.Object, mockDataAccess.Object);
         var act = () => { _ = target.Get(locale, pageStart, pageSize).ToList(); };
 
         // Act
@@ -35,9 +35,9 @@ public class ProductController_GetLocale
         string locale = "Euro";
         int pageStart = 50;
         int pageSize = -1;
-        var mockLogger = new Mock<ILogger<ProductController>>();
+        var mockLogger = new Mock<ILogger<LocalProductController>>();
         var mockDataAccess = new Mock<IDataAccess<Product>>();
-        var target = new ProductController(mockLogger.Object, mockDataAccess.Object);
+        var target = new LocalProductController(mockLogger.Object, mockDataAccess.Object);
         var act = () => { _ = target.Get(locale, pageStart, pageSize).ToList(); };
 
         // Act
@@ -51,9 +51,9 @@ public class ProductController_GetLocale
         string locale = null;
         int pageStart = 50;
         int pageSize = 50;
-        var mockLogger = new Mock<ILogger<ProductController>>();
+        var mockLogger = new Mock<ILogger<LocalProductController>>();
         var mockDataAccess = new Mock<IDataAccess<Product>>();
-        var target = new ProductController(mockLogger.Object, mockDataAccess.Object);
+        var target = new LocalProductController(mockLogger.Object, mockDataAccess.Object);
         var act = () => { _ =target.Get(locale, pageStart, pageSize).ToList(); };
 
         // Act
@@ -68,12 +68,12 @@ public class ProductController_GetLocale
         string locale = "Euro";
         int pageStart = 50;
         int pageSize = 50;
-        var mockLogger = new Mock<ILogger<ProductController>>();
+        var mockLogger = new Mock<ILogger<LocalProductController>>();
         var mockDataAccess = new Mock<IDataAccess<Product>>();
         mockDataAccess
                .Setup(t => t.GetExchangeRate(locale))
                .Returns(exchangeRate);
-        var target = new ProductController(mockLogger.Object, mockDataAccess.Object);
+        var target = new LocalProductController(mockLogger.Object, mockDataAccess.Object);
 
 
 
@@ -95,7 +95,7 @@ public class ProductController_GetLocale
         string locale = "Euro";
         int pageStart = 50;
         int pageSize = 50;
-        var mockLogger = new Mock<ILogger<ProductController>>();
+        var mockLogger = new Mock<ILogger<LocalProductController>>();
         var mockDataAccess = new Mock<IDataAccess<Product>>();
         mockDataAccess
             .Setup(t => t.List(pageStart, pageSize))
@@ -109,7 +109,7 @@ public class ProductController_GetLocale
         mockDataAccess
                .Setup(t => t.GetExchangeRate(locale))
                .Returns(exchangeRate);
-        var target = new ProductController(mockLogger.Object, mockDataAccess.Object);
+        var target = new LocalProductController(mockLogger.Object, mockDataAccess.Object);
 
 
 
