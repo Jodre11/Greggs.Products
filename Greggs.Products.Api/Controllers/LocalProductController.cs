@@ -9,10 +9,11 @@ namespace Greggs.Products.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ProductController : ControllerBase
+public class LocalProductController : ControllerBase
 {
-    private readonly ILogger<ProductController> _logger;
+    private readonly ILogger<LocalProductController> _logger;
     private readonly IDataAccess<Product> _dataAccess;
+    private readonly IDataAccessSingle<ExchangeRate, string> _exchangeRateAccess;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProductController"/> class.
@@ -20,32 +21,44 @@ public class ProductController : ControllerBase
     /// <param name="logger">The logger.</param>
     /// <param name="dataAccess">The data access.</param>
     /// <exception cref="ArgumentNullException"></exception>
-    public ProductController(
-        ILogger<ProductController> logger,
-        IDataAccess<Product> dataAccess)
+    public LocalProductController(
+        ILogger<LocalProductController> logger,
+        IDataAccess<Product> dataAccess,
+        IDataAccessSingle<ExchangeRate, string> exchangeRateAccess)
     {
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(dataAccess);
+        ArgumentNullException.ThrowIfNull(exchangeRateAccess);
 
         _logger = logger;
         _dataAccess = dataAccess;
+        _exchangeRateAccess = exchangeRateAccess;
     }
 
     /// <summary>
     /// Gets a page of products from <see cref="IDataAccess{T}"/> of <see cref="Product"/>.
     /// </summary>
+    /// <param name="locale">Locale of the requestor.</param>
     /// <param name="pageStart">The page start.</param>
     /// <param name="pageSize">Size of the page.</param>
     /// <returns>A sequence of <see cref="Product"/>.</returns>
     [HttpGet]
-    public IEnumerable<Product> Get(int pageStart = 0, int pageSize = 5)
+    public IEnumerable<LocalProduct> Get(string locale = "Euro", int pageStart = 0, int pageSize = 5)
     {
-        _logger.LogTrace($"Begin call to {nameof(ProductController.Get)}");
+        _logger.LogTrace($"Begin call to {nameof(LocalProductController.Get)}");
         if (pageSize < 0) throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, null);
         if (pageStart < 0) throw new ArgumentOutOfRangeException(nameof(pageStart), pageStart, null);
+        ArgumentNullException.ThrowIfNull(locale);
 
-        // An Assumption here about the ordering of the products.
-        // Some concern that this is not asynchronous.
-        return _dataAccess.List(pageStart, pageSize);
+        var exchangeRate = _exchangeRateAccess.Get(locale).Rate;
+        foreach(var product in _dataAccess.List(pageStart, pageSize))
+        {
+            yield return new LocalProduct
+            {
+                Name = product.Name,
+                PriceInPounds = product.PriceInPounds,
+                PriceInLocal = product.PriceInPounds * exchangeRate
+            };
+        }
     }
 }
