@@ -21,11 +21,6 @@ public class ProductAccess : IDataAccess<Product>
         new() { Name = "Coca Cola", PriceInPounds = 1.2m }
     };
 
-    public decimal GetExchangeRate(string locale)
-    {
-        return 1.11m;
-    }
-
     public IEnumerable<Product> List(int? pageStart, int? pageSize)
     {
         var queryable = ProductDatabase.AsQueryable();

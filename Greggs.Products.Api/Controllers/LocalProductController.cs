@@ -13,6 +13,7 @@ public class LocalProductController : ControllerBase
 {
     private readonly ILogger<LocalProductController> _logger;
     private readonly IDataAccess<Product> _dataAccess;
+    private readonly IDataAccessSingle<ExchangeRate, string> _exchangeRateAccess;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProductController"/> class.
@@ -22,13 +23,16 @@ public class LocalProductController : ControllerBase
     /// <exception cref="ArgumentNullException"></exception>
     public LocalProductController(
         ILogger<LocalProductController> logger,
-        IDataAccess<Product> dataAccess)
+        IDataAccess<Product> dataAccess,
+        IDataAccessSingle<ExchangeRate, string> exchangeRateAccess)
     {
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(dataAccess);
+        ArgumentNullException.ThrowIfNull(exchangeRateAccess);
 
         _logger = logger;
         _dataAccess = dataAccess;
+        _exchangeRateAccess = exchangeRateAccess;
     }
 
     /// <summary>
@@ -46,7 +50,7 @@ public class LocalProductController : ControllerBase
         if (pageStart < 0) throw new ArgumentOutOfRangeException(nameof(pageStart), pageStart, null);
         ArgumentNullException.ThrowIfNull(locale);
 
-        var exchangeRate = _dataAccess.GetExchangeRate(locale);
+        var exchangeRate = _exchangeRateAccess.Get(locale).Rate;
         foreach(var product in _dataAccess.List(pageStart, pageSize))
         {
             yield return new LocalProduct

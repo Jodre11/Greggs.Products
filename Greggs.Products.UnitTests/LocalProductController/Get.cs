@@ -19,9 +19,10 @@ public class LocalProductController_Get
         string locale = "Euro";
         int pageStart = -1;
         int pageSize = 50;
-        var mockLogger = new Mock<ILogger<LocalProductController>>();
-        var mockDataAccess = new Mock<IDataAccess<Product>>();
-        var target = new LocalProductController(mockLogger.Object, mockDataAccess.Object);
+        var logger = Mock.Of<ILogger<LocalProductController>>();
+        var dataAccess = Mock.Of<IDataAccess<Product>>();
+        var exchangeRateAccess = Mock.Of<IDataAccessSingle<ExchangeRate, string>>();
+        var target = new LocalProductController(logger, dataAccess, exchangeRateAccess);
         var act = () => { _ = target.Get(locale, pageStart, pageSize).ToList(); };
 
         // Act
@@ -35,9 +36,10 @@ public class LocalProductController_Get
         string locale = "Euro";
         int pageStart = 50;
         int pageSize = -1;
-        var mockLogger = new Mock<ILogger<LocalProductController>>();
-        var mockDataAccess = new Mock<IDataAccess<Product>>();
-        var target = new LocalProductController(mockLogger.Object, mockDataAccess.Object);
+        var logger = Mock.Of<ILogger<LocalProductController>>();
+        var dataAccess = Mock.Of<IDataAccess<Product>>();
+        var exchangeRateAccess = Mock.Of<IDataAccessSingle<ExchangeRate, string>>();
+        var target = new LocalProductController(logger, dataAccess, exchangeRateAccess);
         var act = () => { _ = target.Get(locale, pageStart, pageSize).ToList(); };
 
         // Act
@@ -51,9 +53,10 @@ public class LocalProductController_Get
         string locale = null;
         int pageStart = 50;
         int pageSize = 50;
-        var mockLogger = new Mock<ILogger<LocalProductController>>();
-        var mockDataAccess = new Mock<IDataAccess<Product>>();
-        var target = new LocalProductController(mockLogger.Object, mockDataAccess.Object);
+        var logger = Mock.Of<ILogger<LocalProductController>>();
+        var dataAccess = Mock.Of<IDataAccess<Product>>();
+        var exchangeRateAccess = Mock.Of<IDataAccessSingle<ExchangeRate, string>>();
+        var target = new LocalProductController(logger, dataAccess, exchangeRateAccess);
         var act = () => { _ =target.Get(locale, pageStart, pageSize).ToList(); };
 
         // Act
@@ -68,12 +71,13 @@ public class LocalProductController_Get
         string locale = "Euro";
         int pageStart = 50;
         int pageSize = 50;
-        var mockLogger = new Mock<ILogger<LocalProductController>>();
+        var logger = Mock.Of<ILogger<LocalProductController>>();
         var mockDataAccess = new Mock<IDataAccess<Product>>();
-        mockDataAccess
-               .Setup(t => t.GetExchangeRate(locale))
-               .Returns(exchangeRate);
-        var target = new LocalProductController(mockLogger.Object, mockDataAccess.Object);
+        var mockExchangeRateAccess = new Mock<IDataAccessSingle<ExchangeRate, string>>();
+        mockExchangeRateAccess
+               .Setup(t => t.Get(locale))
+               .Returns(new ExchangeRate(locale, exchangeRate));
+        var target = new LocalProductController(logger, mockDataAccess.Object, mockExchangeRateAccess.Object);
 
 
 
@@ -83,7 +87,7 @@ public class LocalProductController_Get
         // Assert
         result.Should().NotBeNull();
         result.Should().HaveCount(0);
-        mockDataAccess.Verify(t => t.GetExchangeRate(locale), Times.Once);
+        mockExchangeRateAccess.Verify(t => t.Get(locale), Times.Once);
         mockDataAccess.Verify(t => t.List(pageStart, pageSize), Times.Once);
     }
 
@@ -95,8 +99,9 @@ public class LocalProductController_Get
         string locale = "Euro";
         int pageStart = 50;
         int pageSize = 50;
-        var mockLogger = new Mock<ILogger<LocalProductController>>();
+        var logger = Mock.Of<ILogger<LocalProductController>>();
         var mockDataAccess = new Mock<IDataAccess<Product>>();
+        var mockExchangeRateAccess = new Mock<IDataAccessSingle<ExchangeRate, string>>();
         mockDataAccess
             .Setup(t => t.List(pageStart, pageSize))
             .Returns(
@@ -106,10 +111,10 @@ public class LocalProductController_Get
                     new Product { Name = "A", PriceInPounds = 2.0m },
                     new Product { Name = "A", PriceInPounds = 3.0m },
                 });
-        mockDataAccess
-               .Setup(t => t.GetExchangeRate(locale))
-               .Returns(exchangeRate);
-        var target = new LocalProductController(mockLogger.Object, mockDataAccess.Object);
+        mockExchangeRateAccess
+               .Setup(t => t.Get(locale))
+               .Returns(new ExchangeRate(locale, exchangeRate));
+        var target = new LocalProductController(logger, mockDataAccess.Object, mockExchangeRateAccess.Object);
 
 
 
@@ -126,6 +131,6 @@ public class LocalProductController_Get
                 PriceInLocal = exchangeRate
             });
         mockDataAccess.Verify(t => t.List(pageStart, pageSize), Times.Once);
-        mockDataAccess.Verify(t => t.GetExchangeRate(locale), Times.Once);
+        mockExchangeRateAccess.Verify(t => t.Get(locale), Times.Once);
     }
 }
